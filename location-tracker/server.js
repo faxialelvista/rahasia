@@ -12,6 +12,8 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
 
 app.use(express.json());
+// PENTING: Agar Railway dapat membaca Alamat IP asli pengunjung dengan benar
+app.set('trust proxy', true);
 app.use(express.static(path.join(__dirname, "public")));
 
 function readLocations() {
@@ -23,20 +25,17 @@ function saveLocations(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-app.post("/api/location", (req, res) => {
-  const { latitude, longitude, accuracy, battery, platform, browser } = req.body;
-
-  if (typeof latitude !== "number" || typeof longitude !== "number") {
-    return res.status(400).json({ success: false, message: "Koordinat tidak valid" });
-  }
+// Endpoint untuk mencatat kunjungan secara otomatis berdasarkan IP & Perangkat
+app.post("/api/visit", (req, res) => {
+  const { platform, browser } = req.body;
+  
+  // Mengambil Alamat IP pengunjung dari header proxy Railway atau koneksi langsung
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
   const locations = readLocations();
   const record = {
     id: Date.now(),
-    latitude,
-    longitude,
-    accuracy: accuracy ?? null,
-    battery: battery ?? null,
+    ip: ip,
     platform: platform ?? "Unknown",
     browser: browser ?? "Unknown",
     timestamp: new Date().toISOString()
@@ -49,6 +48,6 @@ app.post("/api/location", (req, res) => {
 
 app.get("/api/locations", (req, res) => res.json(readLocations()));
 
-app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server berjalan di port ${PORT}`);
 });
