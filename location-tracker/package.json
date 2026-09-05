@@ -1,0 +1,12 @@
+{
+  "name": "location-tracker-demo",
+  "version": "1.0.0",
+  "description": "POC pelacakan lokasi berbasis izin browser untuk tugas kuliah",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
