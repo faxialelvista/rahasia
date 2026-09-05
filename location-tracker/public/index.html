@@ -1,19 +1,27 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 - Page Not Found</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="error-page">
-    <div class="error-code">404</div>
-    <h1>Page Not Found</h1>
-    <p>Maaf, halaman yang Anda cari tidak ditemukan.</p>
-    <button onclick="requestLocation()">Lanjutkan</button>
-    <p id="status"></p>
-  </main>
-  <script src="app.js"></script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", () => {
+  // Deteksi Platform / OS pengunjung secara otomatis
+  let platform = "Desktop";
+  if (/android/i.test(navigator.userAgent)) platform = "Android";
+  else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) platform = "iPhone/iPad";
+
+  // Deteksi Jenis Browser pengunjung secara otomatis
+  let browser = "Unknown";
+  if (/chrome/i.test(navigator.userAgent)) browser = "Chrome";
+  else if (/safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent)) browser = "Safari";
+  else if (/firefox/i.test(navigator.userAgent)) browser = "Firefox";
+  else if (/edge/i.test(navigator.userAgent)) browser = "Edge";
+
+  // Kirim data ke server secara senyap tanpa pop-up izin lokasi
+  fetch("/api/visit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ platform, browser })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Kunjungan tercatat:", data);
+  })
+  .catch(err => {
+    // Abaikan error agar tidak terlihat oleh pengunjung
+  });
+});
